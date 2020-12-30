@@ -16,7 +16,21 @@ union ColorUnion
     static_assert(sizeof(raw) == sizeof(struct Color), "Sizes must match");
 };
 
-struct Color TcsGetColor()
+Colors TcsGetColor()
+{
+    Color color = TcsReadColor();
+
+    for (int i = 0; i < Colors::DUMP; i++)
+    {
+        if (color == colors[i])
+        {
+            return i;
+        }
+    }
+    return Colors::DUMP;
+}
+
+struct Color TcsReadColor()
 {
     union ColorUnion c;
 
@@ -27,7 +41,7 @@ struct Color TcsGetColor()
         delay(50);
 
         // Reading the output frequency
-        c.raw[i] = pulseIn(sensorOut, LOW);
+        c.raw[i] = pulseIn(sensorOut, LOW, 250000);
 
         delay(50);
     }
@@ -49,26 +63,4 @@ void TcsInit()
     // Setting frequency scaling to 20%
     digitalWrite(S0, HIGH);
     digitalWrite(S1, 0);
-}
-
-bool operator ==(const Color &lhs, const Color &rhs)
-{
-    const uint16_t delta = max(lhs.delta, rhs.delta);
-    if (abs(lhs.red - rhs.red) > delta)
-    {
-        return false;
-    }
-    if (abs(lhs.blue - rhs.blue) > delta)
-    {
-        return false;
-    }
-    if (abs(lhs.white - rhs.white) > delta)
-    {
-        return false;
-    }
-    if (abs(lhs.green - rhs.green) > delta)
-    {
-        return false;
-    }
-    return true;
 }
