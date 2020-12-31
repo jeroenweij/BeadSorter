@@ -1,9 +1,12 @@
 #include "TCS.h"
 #include "Dropper.h"
+#include "Agitator.h"
 
-#define PRINT_BUF  100
-#define LED_PIN    3
-#define BUTTON_PIN 2
+#define PRINT_BUF           100
+#define SOLENOID_PIN        16
+#define BUTTON_PIN          2
+#define AVAILABILITY_LED    18
+#define AVAILABILITY_SENSOR A1
 
 static void ssprintf(char* fmt, ...)
 {
@@ -56,6 +59,32 @@ static void testColor()
     Serial.println();
 }
 
+static void printHelp()
+{
+    Serial.println("-------------------------");
+    Serial.println("Comand input online, command options:");
+    Serial.println("-------------------------");
+
+    Serial.println("1 - 14: ");
+    Serial.println("Move dropper to position (1 - 14)");
+    Serial.println("-------------------------");
+    Serial.println("15: ");
+    Serial.println("Test the current color");
+    Serial.println("-------------------------");
+    Serial.println("16: ");
+    Serial.println("Sort one bead");
+    Serial.println("-------------------------");
+    Serial.println("17: ");
+    Serial.println("Agitate");
+    Serial.println("-------------------------");
+    Serial.println("18: ");
+    Serial.println("Drop 1 bead");
+    Serial.println("-------------------------");
+    Serial.println("19: ");
+    Serial.println("Check if there are enough beads to proceed");
+    Serial.println("-------------------------");
+}
+
 void setup()
 {
     // Begins serial communication
@@ -65,22 +94,38 @@ void setup()
         ;
     }
 
-    Serial.println("-------------------------");
-    Serial.println("Comand input online, write command to perform action");
-    Serial.println("-------------------------");
-    Serial.print("unsigned long ");
-    Serial.println(sizeof(unsigned long));
-    Serial.print("unsigned int ");
-    Serial.println(sizeof(unsigned int));
+    printHelp();
 
     pinMode(BUTTON_PIN, INPUT_PULLUP);
-    pinMode(LED_PIN, OUTPUT);
-    digitalWrite(LED_PIN, LOW);
+    pinMode(SOLENOID_PIN, OUTPUT);
+    pinMode(AVAILABILITY_SENSOR, INPUT);
+    pinMode(AVAILABILITY_LED, OUTPUT);
+    digitalWrite(SOLENOID_PIN, LOW);
+    digitalWrite(AVAILABILITY_LED, LOW);
 
     TcsInit();
     DropperInit();
+    AgitatorInit();
 
-    delay(1000);
+    delay(100);
+}
+
+static void DropBead()
+{
+    digitalWrite(SOLENOID_PIN, HIGH);
+    delay(250);
+    digitalWrite(SOLENOID_PIN, LOW);
+}
+
+static bool BeadAvailable()
+{
+    digitalWrite(AVAILABILITY_LED, HIGH);
+    delay(50);
+    int v = analogRead(AVAILABILITY_SENSOR);
+
+    ssprintf("Availability sensor reads: %d", v);
+    digitalWrite(AVAILABILITY_LED, LOW);
+    return true; // TODO v <> X
 }
 
 static void SortOne()
@@ -91,13 +136,10 @@ static void SortOne()
 
     if (c != Colors::NONE)
     {
+        AgitatorUp();
         DropperSetPos(static_cast < int8_t > (c) - 1);
-        // TODO: drop the bead!
-
-        digitalWrite(LED_PIN, HIGH);
-        delay(500);
-        digitalWrite(LED_PIN, LOW);
-        delay(500);
+        DropBead();
+        AgitatorDown();
     }
 }
 
@@ -106,7 +148,14 @@ void loop()
     delay(100);
     if (digitalRead(BUTTON_PIN) == LOW)
     {
-        SortOne();
+        if (BeadAvailable())
+        {
+            SortOne();
+        }
+        else
+        {
+            Agitate();
+        }
     }
 
     while (Serial.available())
@@ -129,8 +178,20 @@ void loop()
                 ssprintf("> Sort 1 bead (%d)", state);
                 SortOne();
                 break;
+            case 17:
+                ssprintf("> Agitating (%d)", state);
+                Agitate();
+                break;
+            case 18:
+                ssprintf("> Dropping (%d)", state);
+                DropBead();
+                break;
+            case 19:
+                ssprintf("> Bead is %s available. (%d)", state, BeadAvailable() ? "wel" : "NOT");
+                break;
             default:
                 ssprintf("> cannot execute command (%d)", state);
+                printHelp();
                 break;
         }
     }
