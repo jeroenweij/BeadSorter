@@ -1,4 +1,3 @@
-
 #include "Color.h"
 #include "Arduino.h"
 
@@ -24,26 +23,30 @@ void ColorPrintName(Colors& color)
     };
 
     Serial.print("The color is: ");
-    Serial.println(colorString[static_cast < uint16_t > (color)]);
+    Serial.println(colorString[static_cast<uint16_t>(color)]);
+}
+
+static bool check(uint16_t l, uint16_t r, uint16_t d1, uint16_t d2)
+{
+    const uint16_t d = max(d1, d2);
+    return (max(l, r) - min(l, r)) > d;
 }
 
 bool operator == (const Color &lhs, const Color &rhs)
 {
-    const uint16_t delta = max(lhs.delta, rhs.delta);
-
-    if (abs(lhs.red - rhs.red) > delta)
+    if (check(lhs.red, rhs.red, lhs.redDelta, rhs.redDelta))
     {
         return false;
     }
-    if (abs(lhs.blue - rhs.blue) > delta)
+    if (check(lhs.blue, rhs.blue, lhs.blueDelta, rhs.blueDelta))
     {
         return false;
     }
-    if (abs(lhs.white - rhs.white) > delta)
+    if (check(lhs.white, rhs.white, lhs.whiteDelta, rhs.whiteDelta))
     {
         return false;
     }
-    if (abs(lhs.green - rhs.green) > delta)
+    if (check(lhs.green, rhs.green, lhs.greenDelta, rhs.greenDelta))
     {
         return false;
     }

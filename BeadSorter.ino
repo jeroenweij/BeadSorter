@@ -20,7 +20,7 @@ static void ssprintf(char* fmt, ...)
     Serial.println(buf);
 }
 
-#define TEST_I 10
+#define TEST_I 25
 static void testColor()
 {
     struct Color c[TEST_I] = {0};
@@ -47,6 +47,8 @@ static void testColor()
             cmax.white = max(cmax.white, c[i].white);
             cmax.green = max(cmax.green, c[i].green);
         }
+        ssprintf("%04u, %04u, %04u, %04u", c[i].red, c[i].blue, c[i].white, c[i].green);
+        delay(200);
     }
 
     Serial.println("MIN");
@@ -56,7 +58,17 @@ static void testColor()
     Serial.println("DIFF");
     ssprintf("%04u, %04u, %04u, %04u", cmax.red - cmin.red, cmax.blue - cmin.blue,
       cmax.white - cmin.white, cmax.green - cmin.green);
-    Serial.println();
+
+    Color cdelta;
+
+    cdelta.red   = (cmax.red - cmin.red) / 2;
+    cdelta.blue  = (cmax.blue - cmin.blue) / 2;
+    cdelta.white = (cmax.white - cmin.white) / 2;
+    cdelta.green = (cmax.green - cmin.green) / 2;
+    Serial.println("AVR");
+    ssprintf("%u, %u, %u, %u, %u, %u, %u, %u", (cmax.red + cmin.red) / 2, (cmax.blue + cmin.blue) / 2,
+      (cmax.white + cmin.white) / 2, (cmax.green + cmin.green) / 2,
+      cdelta.red, cdelta.blue, cdelta.white, cdelta.green);
 }
 
 static void printHelp()

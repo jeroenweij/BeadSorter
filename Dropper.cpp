@@ -13,7 +13,7 @@ static bool tumbleIsRigth = true;
 static int8_t oldPos      = 0;
 
 #define TUMBLE_PIN 10
-#define SERVO_PIN 9
+#define SERVO_PIN  9
 
 Servo myservo;
 Servo tubble;
@@ -63,7 +63,7 @@ void DropperSetPos(int8_t pos)
     pos %= numSpaces;
 
     Serial.print("pos to ");
-    Serial.println(pos);
+    Serial.println(pos + 1);
     int mic = (pos * space) + turnOffset;
 
     // Serial.print("mic to ");
