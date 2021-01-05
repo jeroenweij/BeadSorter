@@ -1,0 +1,17 @@
+
+#pragma once
+
+#define PIN_BUTTON 2
+#define PIN_TCS_LED 3 // PWM
+#define PIN_TCS_S0 4 // A6
+#define PIN_TCS_S1 5 // PWM
+#define PIN_TCS_S2 6 // PWM A7
+#define PIN_TCS_S3 7
+#define PIN_TCS_OUT 8 // A8
+#define PIN_DROPPER_SERVO 9 // A9
+#define PIN_TUMBLER_SERVO 10 // PWM A10
+#define PIN_AGITATOR_SERVO 14
+#define PIN_AGITATOR_VIBRATOR 15
+#define PIN_SOLENOID 16
+#define PIN_AVAILABILITY_LED 18 // A0
+#define PIN_AVAILABILITY_SENSOR 19 // A1
