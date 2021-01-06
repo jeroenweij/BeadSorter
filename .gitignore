@@ -13,3 +13,7 @@
 *.a
 *.lib
 
+
+simulator/build/
+
+*.user

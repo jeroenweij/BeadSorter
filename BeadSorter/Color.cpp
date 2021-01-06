@@ -1,7 +1,7 @@
 #include "Color.h"
 #include "Arduino.h"
 
-void ColorPrintName(Colors& color)
+void ColorPrintName(const Colors& color)
 {
     static const char* colorString[] =
     {

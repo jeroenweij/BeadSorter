@@ -56,5 +56,5 @@ static const Color colors[] =
     {0,    0,    0,    0,    defdelta},          // DUMP,
 };
 
-void ColorPrintName(Colors& color);
+void ColorPrintName(const Colors &color);
 bool operator == (const Color& lhs, const Color& rhs);

@@ -1,6 +1,10 @@
 // TCS230 or TCS3200 pins wiring to Arduino
 
 #include <assert.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdarg.h>
+
 #include "TCS.h"
 #include "Arduino.h"
 #include "pins.h"

@@ -1,3 +1,5 @@
+#include <stdarg.h>
+
 #include "TCS.h"
 #include "Dropper.h"
 #include "Agitator.h"
@@ -6,7 +8,7 @@
 #define SOLENOID_PIN        11
 #define BUTTON_PIN          2
 #define AVAILABILITY_LED    12
-#define AVAILABILITY_SENSOR A5
+#define AVAILABILITY_SENSOR 5
 
 static void ssprintf(char* fmt, ...)
 {
@@ -126,6 +128,14 @@ static bool BeadAvailable()
     return true; // TODO v <> X
 }
 
+static void DropBead()
+{
+    digitalWrite(SOLENOID_PIN, HIGH);
+    delay(400);
+    digitalWrite(SOLENOID_PIN, LOW);
+    delay(600);
+}
+
 static void ClearQueue()
 {
     Serial.println("CLEARIN QUEUE");
@@ -170,20 +180,28 @@ void setup()
     Serial.println("READY!");
 }
 
-static void DropBead()
-{
-    digitalWrite(SOLENOID_PIN, HIGH);
-    delay(400);
-    digitalWrite(SOLENOID_PIN, LOW);
-    delay(600);
-}
-
 static void testAll()
 {
-    for (int c = Colors::RED; c <= DUMP; c++)
+    Colors toTest[] =
     {
-        Colors co = c;
-        ColorPrintName(co);
+        RED,
+        GREEN,
+        BLUE,
+        YELLOW,
+        ORANGE,
+        PINK,
+        PURPLE,
+        GREY,
+        BLACK,
+        WHITE,
+        GLOW,
+        BROWN,
+        PALE_GREEN,
+    };
+
+    for (const auto &c : toTest)
+    {
+        ColorPrintName(c);
         testColor();
         DropBead();
         DropBead();
