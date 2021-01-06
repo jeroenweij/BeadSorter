@@ -1,4 +1,6 @@
 #include "Serial.h"
+#include "mock.h"
+
 #include <iostream>
 
 Serial_::Serial_()
@@ -9,12 +11,12 @@ void Serial_::begin(int32_t speed)
 
 bool Serial_::available()
 {
-    return false;
+    RETURN_MOCK;
 }
 
 int32_t Serial_::parseInt()
 {
-
+    RETURN_MOCK;
 }
 
 void Serial_::print(const std::string &s)

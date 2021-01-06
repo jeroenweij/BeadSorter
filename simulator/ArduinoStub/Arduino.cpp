@@ -1,5 +1,6 @@
 #include "Arduino.h"
 #include <unistd.h>
+#include "mock.h"
 
 void pinMode(uint8_t, uint8_t)
 { }
@@ -9,27 +10,27 @@ void digitalWrite(uint8_t pin, uint8_t val)
 
 int16_t digitalRead(uint8_t pin)
 {
-    return HIGH;
+    RETURN_MOCK;
 }
 
 int16_t analogRead(uint8_t pin)
 {
-    return 0;
+    RETURN_MOCK;
 }
 
 void delay(uint32_t ms)
 {
-    usleep(ms * 1000);
+    usleep(ms * 500); // half of normal for faster execution
 }
 
 uint32_t pulseIn(uint8_t pin, uint8_t state, unsigned long timeout)
 {
-    return 0;
+    RETURN_MOCK;
 }
 
 uint32_t micros()
 {
-    return 0;
+    RETURN_MOCK;
 }
 
 int32_t map(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max)

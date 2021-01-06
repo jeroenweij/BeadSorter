@@ -7,5 +7,7 @@ add_subdirectory(ArduinoStub)
 add_subdirectory(../BeadSorter BeadSorter)
 
 # add the executable
-add_executable(BeadSorterSimulator main.cpp)
+add_executable(BeadSorterSimulator
+    main.cpp
+    )
 target_link_libraries(BeadSorterSimulator ArduinoStub BeadSorter)
