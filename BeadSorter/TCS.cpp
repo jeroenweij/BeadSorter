@@ -1,14 +1,9 @@
 // TCS230 or TCS3200 pins wiring to Arduino
-#define LED_PIN   3
-#define S0        4
-#define S1        5
-#define S2        6
-#define S3        7
-#define sensorOut 8
 
 #include <assert.h>
 #include "TCS.h"
 #include "Arduino.h"
+#include "pins.h"
 
 #define PRINT_BUF 100
 
@@ -146,13 +141,13 @@ Colors TcsGetColor()
 
 static uint32_t readFreq()
 {
-    pulseIn(sensorOut, LOW);
+    pulseIn(PIN_TCS_OUT, LOW);
 
     uint32_t time = micros();
 
     for (int i = 0; i < 250; i++)
     {
-        pulseIn(sensorOut, HIGH);
+        pulseIn(PIN_TCS_OUT, HIGH);
     }
     time = micros() - time;
     return time;
@@ -164,13 +159,13 @@ struct Color TcsReadColor()
 {
     union ColorUnion c = {0};
 
-    digitalWrite(LED_PIN, HIGH);
+    digitalWrite(PIN_TCS_LED, HIGH);
     delay(500);
 
     for (uint8_t i = 0; i < 4; i++)
     {
-        digitalWrite(S2, i & 0x01);
-        digitalWrite(S3, i & 0x02);
+        digitalWrite(PIN_TCS_S2, i & 0x01);
+        digitalWrite(PIN_TCS_S3, i & 0x02);
         delay(200);
 
         // Reading the output frequency
@@ -193,7 +188,7 @@ struct Color TcsReadColor()
         delay(50);
     }
 
-    digitalWrite(LED_PIN, LOW);
+    digitalWrite(PIN_TCS_LED, LOW);
 
     return c.color;
 }
@@ -201,18 +196,18 @@ struct Color TcsReadColor()
 void TcsInit()
 {
     // Setting the outputs
-    pinMode(S0, OUTPUT);
-    pinMode(S1, OUTPUT);
-    pinMode(S2, OUTPUT);
-    pinMode(S3, OUTPUT);
-    pinMode(LED_PIN, OUTPUT);
+    pinMode(PIN_TCS_S0, OUTPUT);
+    pinMode(PIN_TCS_S1, OUTPUT);
+    pinMode(PIN_TCS_S2, OUTPUT);
+    pinMode(PIN_TCS_S3, OUTPUT);
+    pinMode(PIN_TCS_LED, OUTPUT);
 
     // Setting frequency scaling to 20%
-    digitalWrite(LED_PIN, LOW);
+    digitalWrite(PIN_TCS_LED, LOW);
     // Setting the sensorOut as an input
-    pinMode(sensorOut, INPUT);
+    pinMode(PIN_TCS_OUT, INPUT);
 
     // Setting frequency scaling to 20%
-    digitalWrite(S0, HIGH);
-    digitalWrite(S1, 0);
+    digitalWrite(PIN_TCS_S0, HIGH);
+    digitalWrite(PIN_TCS_S1, LOW);
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PIN_HEADER="pins.h"
+PIN_HEADER="BeadSorter/pins.h"
 rm -rf $PIN_HEADER
 
 echo "" >> $PIN_HEADER
