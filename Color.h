@@ -31,8 +31,8 @@ enum Colors
     BLACK,
     WHITE, // 10
     GLOW,
+    BROWN,
     PALE_GREEN,
-    PALE_YELLOW,
     DUMP, // 14
 };
 

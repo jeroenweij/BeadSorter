@@ -17,13 +17,13 @@ void ColorPrintName(Colors& color)
         "BLACK",
         "WHITE",
         "GLOW",
+        "BROWN",
         "PALE_GREEN",
-        "PALE_YELLOW",
         "DUMP",
     };
 
     Serial.print("The color is: ");
-    Serial.println(colorString[static_cast<uint16_t>(color)]);
+    Serial.println(colorString[color]);
 }
 
 static bool check(uint16_t l, uint16_t r, uint16_t d1, uint16_t d2)

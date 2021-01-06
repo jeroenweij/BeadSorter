@@ -3,10 +3,10 @@
 #include "Agitator.h"
 
 #define PRINT_BUF           100
-#define SOLENOID_PIN        16
+#define SOLENOID_PIN        11
 #define BUTTON_PIN          2
-#define AVAILABILITY_LED    18
-#define AVAILABILITY_SENSOR A1
+#define AVAILABILITY_LED    12
+#define AVAILABILITY_SENSOR A5
 
 static void ssprintf(char* fmt, ...)
 {
@@ -20,55 +20,67 @@ static void ssprintf(char* fmt, ...)
     Serial.println(buf);
 }
 
-#define TEST_I 25
+#define TEST_I 15
 static void testColor()
 {
-    struct Color c[TEST_I] = {0};
-    struct Color cmin      = {0};
-    struct Color cmax      = {0};
+    struct Color c    = {0};
+    struct Color cmin = {0};
+    struct Color cmax = {0};
 
+    TcsReadColor();
+    delay(2000);
+
+    ssprintf("X, Red, Blue, White, Green");
     for (uint16_t i = 0; i < TEST_I; i++)
     {
-        c[i] = TcsReadColor();
+        c = TcsReadColor();
         if (i == 0)
         {
-            cmin = c[i];
-            cmax = c[i];
+            cmin = c;
+            cmax = c;
         }
         else
         {
-            cmin.red   = min(cmin.red, c[i].red);
-            cmin.blue  = min(cmin.blue, c[i].blue);
-            cmin.white = min(cmin.white, c[i].white);
-            cmin.green = min(cmin.green, c[i].green);
+            cmin.red   = min(cmin.red, c.red);
+            cmin.blue  = min(cmin.blue, c.blue);
+            cmin.white = min(cmin.white, c.white);
+            cmin.green = min(cmin.green, c.green);
 
-            cmax.red   = max(cmax.red, c[i].red);
-            cmax.blue  = max(cmax.blue, c[i].blue);
-            cmax.white = max(cmax.white, c[i].white);
-            cmax.green = max(cmax.green, c[i].green);
+            cmax.red   = max(cmax.red, c.red);
+            cmax.blue  = max(cmax.blue, c.blue);
+            cmax.white = max(cmax.white, c.white);
+            cmax.green = max(cmax.green, c.green);
         }
-        ssprintf("%04u, %04u, %04u, %04u", c[i].red, c[i].blue, c[i].white, c[i].green);
-        delay(200);
+        ssprintf("%03u, %u, %u, %u, %u", i, c.red, c.blue, c.white, c.green);
+        delay(2000);
     }
 
-    Serial.println("MIN");
-    ssprintf("%04u, %04u, %04u, %04u", cmin.red, cmin.blue, cmin.white, cmin.green);
-    Serial.println("MAX");
-    ssprintf("%04u, %04u, %04u, %04u", cmax.red, cmax.blue, cmax.white, cmax.green);
-    Serial.println("DIFF");
-    ssprintf("%04u, %04u, %04u, %04u", cmax.red - cmin.red, cmax.blue - cmin.blue,
-      cmax.white - cmin.white, cmax.green - cmin.green);
+    ssprintf("MIN, %u, %u, %u, %u", cmin.red, cmin.blue, cmin.white, cmin.green);
+    ssprintf("MAX, %u, %u, %u, %u", cmax.red, cmax.blue, cmax.white, cmax.green);
+    //    Serial.println("DIFF");
+    //    ssprintf("%u, %u, %u, %u", cmax.red - cmin.red, cmax.blue - cmin.blue,
+    //      cmax.white - cmin.white, cmax.green - cmin.green);
 
     Color cdelta;
 
-    cdelta.red   = (cmax.red - cmin.red) / 2;
-    cdelta.blue  = (cmax.blue - cmin.blue) / 2;
-    cdelta.white = (cmax.white - cmin.white) / 2;
-    cdelta.green = (cmax.green - cmin.green) / 2;
-    Serial.println("AVR");
-    ssprintf("%u, %u, %u, %u, %u, %u, %u, %u", (cmax.red + cmin.red) / 2, (cmax.blue + cmin.blue) / 2,
-      (cmax.white + cmin.white) / 2, (cmax.green + cmin.green) / 2,
-      cdelta.red, cdelta.blue, cdelta.white, cdelta.green);
+    cdelta.redDelta   = (cmax.red - cmin.red) / 2;
+    cdelta.blueDelta  = (cmax.blue - cmin.blue) / 2;
+    cdelta.whiteDelta = (cmax.white - cmin.white) / 2;
+    cdelta.greenDelta = (cmax.green - cmin.green) / 2;
+
+    uint32_t add;
+
+    add          = (uint32_t) cmax.red + (uint32_t) cmin.red;
+    cdelta.red   = add / 2u;
+    add          = (uint32_t) cmax.blue + (uint32_t) cmin.blue;
+    cdelta.blue  = add / 2u;
+    add          = (uint32_t) cmax.white + (uint32_t) cmin.white;
+    cdelta.white = add / 2u;
+    add          = (uint32_t) cmax.green + (uint32_t) cmin.green;
+    cdelta.green = add / 2u;
+
+    ssprintf("AVR, %u, %u, %u, %u, %u, %u, %u, %u", cdelta.red, cdelta.blue, cdelta.white, cdelta.green,
+      cdelta.redDelta, cdelta.blueDelta, cdelta.whiteDelta, cdelta.greenDelta);
 }
 
 static void printHelp()
@@ -95,38 +107,12 @@ static void printHelp()
     Serial.println("19: ");
     Serial.println("Check if there are enough beads to proceed");
     Serial.println("-------------------------");
-}
-
-void setup()
-{
-    // Begins serial communication
-    Serial.begin(9600);
-    while (!Serial)
-    {
-        ;
-    }
-
-    printHelp();
-
-    pinMode(BUTTON_PIN, INPUT_PULLUP);
-    pinMode(SOLENOID_PIN, OUTPUT);
-    pinMode(AVAILABILITY_SENSOR, INPUT);
-    pinMode(AVAILABILITY_LED, OUTPUT);
-    digitalWrite(SOLENOID_PIN, LOW);
-    digitalWrite(AVAILABILITY_LED, LOW);
-
-    TcsInit();
-    DropperInit();
-    AgitatorInit();
-
-    delay(100);
-}
-
-static void DropBead()
-{
-    digitalWrite(SOLENOID_PIN, HIGH);
-    delay(250);
-    digitalWrite(SOLENOID_PIN, LOW);
+    Serial.println("20: ");
+    Serial.println("Test all colors seperated by black beads");
+    Serial.println("-------------------------");
+    Serial.println("21: ");
+    Serial.println("Empty the queue");
+    Serial.println("-------------------------");
 }
 
 static bool BeadAvailable()
@@ -140,17 +126,84 @@ static bool BeadAvailable()
     return true; // TODO v <> X
 }
 
+static void ClearQueue()
+{
+    Serial.println("CLEARIN QUEUE");
+    DropperSetPos(static_cast < int8_t > (Colors::DUMP) -1);
+    //    while (BeadAvailable())
+    //    {
+    //        DropBead();
+    //        delay(100);
+    //    }
+    for (int i = 0; i < 10; i++)
+    {
+        DropBead();
+        delay(100);
+    }
+    Serial.println("Queue cleared");
+}
+
+void setup()
+{
+    // Begins serial communication
+    Serial.begin(9600);
+    while (!Serial)
+    {
+        ;
+    }
+
+    pinMode(BUTTON_PIN, INPUT_PULLUP);
+    pinMode(SOLENOID_PIN, OUTPUT);
+    pinMode(AVAILABILITY_SENSOR, INPUT);
+    pinMode(AVAILABILITY_LED, OUTPUT);
+    digitalWrite(SOLENOID_PIN, LOW);
+    digitalWrite(AVAILABILITY_LED, LOW);
+
+    // ClearQueue();
+    TcsInit();
+    DropperInit();
+    AgitatorInit();
+
+    delay(100);
+
+    printHelp();
+    Serial.println("READY!");
+}
+
+static void DropBead()
+{
+    digitalWrite(SOLENOID_PIN, HIGH);
+    delay(400);
+    digitalWrite(SOLENOID_PIN, LOW);
+    delay(600);
+}
+
+static void testAll()
+{
+    for (int c = Colors::RED; c <= DUMP; c++)
+    {
+        Colors co = c;
+        ColorPrintName(co);
+        testColor();
+        DropBead();
+        DropBead();
+        delay(5000);
+    }
+}
+
 static void SortOne()
 {
     Colors c = TcsGetColor();
+    static Colors prevC = Colors::DUMP;
 
-    ColorPrintName(c);
+    ColorPrintName(prevC);
 
     if (c != Colors::NONE)
     {
         AgitatorUp();
-        DropperSetPos(static_cast < int8_t > (c) - 1);
+        DropperSetPos(static_cast < int8_t > (prevC) - 1);
         DropBead();
+        prevC = c;
         AgitatorDown();
     }
 }
@@ -199,7 +252,15 @@ void loop()
                 DropBead();
                 break;
             case 19:
-                ssprintf("> Bead is %s available. (%d)", state, BeadAvailable() ? "wel" : "NOT");
+                ssprintf("> Bead is %s available. (%d)", BeadAvailable() ? "wel" : "NOT", state);
+                break;
+            case 20:
+                ssprintf("> Testing all colors (%d)", state);
+                testAll();
+                break;
+            case 21:
+                ssprintf("> Emptying the queue (%d)", state);
+                ClearQueue();
                 break;
             default:
                 ssprintf("> cannot execute command (%d)", state);
