@@ -1,10 +1,10 @@
 #include "Arduino.h"
 #include "Dropper.h"
+#include "pins.h"
 #include <Servo.h>
 
 static const uint16_t space      = 240;
 static const uint16_t turnOffset = 570;
-static const uint8_t shakeV      = 15;
 static const uint8_t numSpaces   = 7;
 static const uint8_t tumbleLeft  = 40;
 static const uint8_t tumbleRigth = 130;
@@ -12,22 +12,8 @@ static const uint8_t tumbleRigth = 130;
 static bool tumbleIsRigth = true;
 static int8_t oldPos      = 0;
 
-#define TUMBLE_PIN 10
-#define SERVO_PIN  9
-
-Servo myservo;
-Servo tubble;
-
-static void shake()
-{
-    for (int8_t i = 0; i < 50; i++)
-    {
-        myservo.write((oldPos * space) + turnOffset + shakeV);
-        delay(70);
-        myservo.write((oldPos * space) + turnOffset);
-        delay(100);
-    }
-}
+Servo dropperServo;
+Servo tubbleServo;
 
 static bool setTubler(bool rigth)
 {
@@ -38,8 +24,8 @@ static bool setTubler(bool rigth)
     if (change)
     {
         Serial.println("TUMBLING");
-        tubble.attach(TUMBLE_PIN);
-        tubble.write(rigth ? tumbleRigth : tumbleLeft);
+        tubbleServo.attach(PIN_TUMBLER_SERVO);
+        tubbleServo.write(rigth ? tumbleRigth : tumbleLeft);
     }
     tumbleIsRigth = rigth;
     return change;
@@ -72,8 +58,8 @@ void DropperSetPos(int8_t pos)
     {
         mic -= 25;
     }
-    myservo.attach(SERVO_PIN);
-    myservo.writeMicroseconds(mic);
+    dropperServo.attach(PIN_DROPPER_SERVO);
+    dropperServo.writeMicroseconds(mic);
 
     int8_t offset = abs(pos - oldPos);
     int calcDelay = 0;
@@ -94,7 +80,7 @@ void DropperSetPos(int8_t pos)
     delay(calcDelay);
     if (tChange)
     {
-        tubble.detach();
+        tubbleServo.detach();
     }
-    myservo.detach();
+    dropperServo.detach();
 }

@@ -1,33 +1,31 @@
 #include "Arduino.h"
 #include "Agitator.h"
+#include "pins.h"
 #include <Servo.h>
 
 static const uint8_t agitateUp   = 40;
 static const uint8_t agitateDown = 130;
 
-#define AGITATOR_PIN 14
-#define VIBRATION_PIN 15
-
 Servo agitatorServo;
 
 void AgitatorInit()
 {
-    pinMode(VIBRATION_PIN, OUTPUT);
-    agitatorServo.attach(AGITATOR_PIN);
+    pinMode(PIN_AGITATOR_VIBRATOR, OUTPUT);
+    agitatorServo.attach(PIN_AGITATOR_SERVO);
     AgitatorDown();
     // agitatorServo.detach();
 }
 
 void AgitatorUp()
 {
+    digitalWrite(PIN_AGITATOR_VIBRATOR, HIGH);
     agitatorServo.write(agitateUp);
-    digitalWrite(VIBRATION_PIN, HIGH);
 }
 
 void AgitatorDown()
 {
     agitatorServo.write(agitateDown);
-    digitalWrite(VIBRATION_PIN, LOW);
+    digitalWrite(PIN_AGITATOR_VIBRATOR, LOW);
 }
 
 void Agitate()

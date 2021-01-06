@@ -3,13 +3,9 @@
 #include "TCS.h"
 #include "Dropper.h"
 #include "Agitator.h"
+#include "pins.h"
 
 #define PRINT_BUF           100
-#define SOLENOID_PIN        11
-#define BUTTON_PIN          2
-#define AVAILABILITY_LED    12
-#define AVAILABILITY_SENSOR 5
-
 static void ssprintf(char* fmt, ...)
 {
     static char buf[PRINT_BUF];
@@ -119,20 +115,20 @@ static void printHelp()
 
 static bool BeadAvailable()
 {
-    digitalWrite(AVAILABILITY_LED, HIGH);
+    digitalWrite(PIN_AVAILABILITY_LED, HIGH);
     delay(50);
-    int v = analogRead(AVAILABILITY_SENSOR);
+    int v = analogRead(PIN_AVAILABILITY_SENSOR);
 
     ssprintf("Availability sensor reads: %d", v);
-    digitalWrite(AVAILABILITY_LED, LOW);
+    digitalWrite(PIN_AVAILABILITY_LED, LOW);
     return true; // TODO v <> X
 }
 
 static void DropBead()
 {
-    digitalWrite(SOLENOID_PIN, HIGH);
+    digitalWrite(PIN_SOLENOID, HIGH);
     delay(400);
-    digitalWrite(SOLENOID_PIN, LOW);
+    digitalWrite(PIN_SOLENOID, LOW);
     delay(600);
 }
 
@@ -162,12 +158,12 @@ void setup()
         ;
     }
 
-    pinMode(BUTTON_PIN, INPUT_PULLUP);
-    pinMode(SOLENOID_PIN, OUTPUT);
-    pinMode(AVAILABILITY_SENSOR, INPUT);
-    pinMode(AVAILABILITY_LED, OUTPUT);
-    digitalWrite(SOLENOID_PIN, LOW);
-    digitalWrite(AVAILABILITY_LED, LOW);
+    pinMode(PIN_BUTTON, INPUT_PULLUP);
+    pinMode(PIN_SOLENOID, OUTPUT);
+    pinMode(PIN_AVAILABILITY_SENSOR, INPUT);
+    pinMode(PIN_AVAILABILITY_LED, OUTPUT);
+    digitalWrite(PIN_SOLENOID, LOW);
+    digitalWrite(PIN_AVAILABILITY_LED, LOW);
 
     // ClearQueue();
     TcsInit();
@@ -229,7 +225,7 @@ static void SortOne()
 void loop()
 {
     delay(100);
-    if (digitalRead(BUTTON_PIN) == LOW)
+    if (digitalRead(PIN_BUTTON) == LOW)
     {
         if (BeadAvailable())
         {
