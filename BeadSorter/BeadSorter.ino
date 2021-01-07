@@ -1,22 +1,8 @@
-#include <stdarg.h>
-
 #include "TCS.h"
 #include "Dropper.h"
 #include "Agitator.h"
 #include "pins.h"
-
-#define PRINT_BUF 100
-static void ssprintf(char* fmt, ...)
-{
-    static char buf[PRINT_BUF];
-    va_list va;
-
-    va_start(va, fmt);
-    vsnprintf(buf, PRINT_BUF, fmt, va);
-    va_end(va);
-
-    Serial.println(buf);
-}
+#include "Ssprintf.h"
 
 #define TEST_I 15
 static void testColor()
@@ -197,9 +183,7 @@ static void testAll()
 
     for (const auto &c : toTest)
     {
-        Serial.println("Testing color:");
-        ColorPrintName(c);
-        Serial.println();
+        ssprintf("Testing color: %s ", ColorToString(c));
 
         testColor();
         DropBead();
@@ -213,16 +197,11 @@ static void SortOne()
     Colors c = TcsGetColor();
     static Colors prevC = Colors::DUMP;
 
-    Serial.print("Detected color: ");
-    ColorPrintName(c);
-    Serial.println();
+    ssprintf("Detected color: %s ", ColorToString(c));
 
     if (c != Colors::NONE)
     {
-        Serial.print("Dropping color: ");
-        ColorPrintName(prevC);
-        Serial.println();
-
+        ssprintf("Dropping color: %s ", ColorToString(prevC));
         AgitatorUp();
         DropperSetPos(prevC);
         DropBead();

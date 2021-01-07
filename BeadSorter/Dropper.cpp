@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include "Dropper.h"
 #include "pins.h"
+#include "Ssprintf.h"
 #include <Servo.h>
 
 static const uint16_t space      = 240;
@@ -47,9 +48,7 @@ void DropperInit()
 
 void DropperSetPos(Colors color)
 {
-    Serial.print("Dropper pos to ");
-    ColorPrintName(color);
-    Serial.println();
+    ssprintf("Dropper pos to %s ", ColorToString(color));
 
     int8_t pos = ColorToDropPos(color);
 
@@ -62,8 +61,6 @@ void DropperSetPos(Colors color)
     Serial.println(pos + 1);
     int mic = (pos * space) + turnOffset;
 
-    // Serial.print("mic to ");
-    // Serial.println(mic);
     if (pos < oldPos)
     {
         mic -= 25;
@@ -77,16 +74,12 @@ void DropperSetPos(Colors color)
     if (offset > 0)
     {
         calcDelay = ((offset * 130) + 195);
-        // Serial.print("calcDelay to ");
-        // Serial.println(calcDelay);
     }
     if (tChange)
     {
         calcDelay = max(800, calcDelay);
     }
     oldPos = pos;
-    // Serial.print("calcDelay to ");
-    // Serial.println(calcDelay);
     delay(calcDelay);
     if (tChange)
     {

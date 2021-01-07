@@ -1,27 +1,9 @@
-// TCS230 or TCS3200 pins wiring to Arduino
-
 #include <assert.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdarg.h>
 
 #include "TCS.h"
 #include "Arduino.h"
 #include "pins.h"
-
-#define PRINT_BUF 100
-
-static void ssprintf(char* fmt, ...)
-{
-    static char buf[PRINT_BUF];
-    va_list va;
-
-    va_start(va, fmt);
-    vsnprintf(buf, PRINT_BUF, fmt, va);
-    va_end(va);
-
-    Serial.println(buf);
-}
+#include "Ssprintf.h"
 
 union ColorUnion
 {
@@ -179,7 +161,6 @@ struct Color TcsReadColor()
             ssprintf("Adjusting lower bound %d from %lu to %lu", i, cMin[i], f);
             cMin[i] = f;
             ssprintf("Adjusting %d set to %lu", i, cMin[i]);
-
         }
         if (f > cMax[i])
         {

@@ -1,7 +1,7 @@
 #include "Color.h"
 #include "Arduino.h"
 
-void ColorPrintName(const Colors& color)
+const char* ColorToString(const Colors& color)
 {
     static const char* colorString[] =
     {
@@ -27,7 +27,11 @@ void ColorPrintName(const Colors& color)
         "PALE_PURPLE"
     };
 
-    Serial.print(colorString[color]);
+    if (color <= Colors::PALE_PURPLE)
+    {
+        return (colorString[color]);
+    }
+    return "UNKNOWN";
 }
 
 static bool check(uint16_t l, uint16_t r, uint16_t d1, uint16_t d2)

@@ -61,5 +61,5 @@ static const Color colors[] =
     {0,    0,    0,    0,    defdelta},          // DUMP,
 };
 
-void ColorPrintName(const Colors &color);
+const char* ColorToString(const Colors &color);
 bool operator == (const Color& lhs, const Color& rhs);
