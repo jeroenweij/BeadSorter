@@ -9,4 +9,6 @@ public:
     void detach();
     void write(int value);
     void writeMicroseconds(int value);
+private:
+    uint8_t pin;
 };

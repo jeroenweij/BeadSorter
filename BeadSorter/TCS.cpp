@@ -151,7 +151,7 @@ struct Color TcsReadColor()
     for (uint8_t i = 0; i < 4; i++)
     {
         digitalWrite(PIN_TCS_S2, i & 0x01);
-        digitalWrite(PIN_TCS_S3, i & 0x02);
+        digitalWrite(PIN_TCS_S3, (i & 0x02) > 0);
         delay(200);
 
         // Reading the output frequency

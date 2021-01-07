@@ -1,12 +1,39 @@
-#include "Arduino.h"
 #include <unistd.h>
+#include <iostream>
+#include <map>
+
+#include "Arduino.h"
 #include "mock.h"
 
-void pinMode(uint8_t, uint8_t)
-{ }
+std::map<uint8_t, PinStatus> pins;
+
+PinStatus& GetPinStatus(uint8_t pinNum)
+{
+    const auto& pin = pins.find(pinNum);
+
+    if (pin != pins.end())
+    {
+        return pin->second;
+    }
+    const auto& emp = pins.emplace(std::make_pair(pinNum, PinStatus()));
+
+    if (!emp.second)
+    {
+        std::cout << "Map insert failed" << std::endl;
+        exit(1);
+    }
+    return emp.first->second;
+}
+
+void pinMode(uint8_t pinNum, uint8_t mode)
+{
+    GetPinStatus(pinNum).mode = static_cast<PinMode>(mode);
+}
 
 void digitalWrite(uint8_t pin, uint8_t val)
-{ }
+{
+    GetPinStatus(pin).value = val;
+}
 
 int16_t digitalRead(uint8_t pin)
 {

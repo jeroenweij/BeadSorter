@@ -112,6 +112,7 @@ static bool BeadAvailable()
 
 static void DropBead()
 {
+    Serial.println("Dropping");
     digitalWrite(PIN_SOLENOID, HIGH);
     delay(400);
     digitalWrite(PIN_SOLENOID, LOW);

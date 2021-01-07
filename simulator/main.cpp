@@ -2,6 +2,7 @@
 
 #include "Arduino.h"
 #include "mock.h"
+#include "window.h"
 #include "BeadSorter.ino"
 
 using namespace std;
@@ -69,6 +70,8 @@ static void mainloopSerialInput()
 
 int main()
 {
+    Window::OpenWindow();
+
     struct
     {
         std::string name;
@@ -90,5 +93,7 @@ int main()
         VerifyExpectations();
         std::cout << "TEST " << test.name << " PASSED" << std::endl;
     }
+
+    Window::CloseWindow();
     return 0;
 }
