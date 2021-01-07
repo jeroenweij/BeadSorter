@@ -18,17 +18,22 @@ void ColorPrintName(const Colors& color)
         "WHITE",
         "GLOW",
         "BROWN",
-        "PALE_GREEN",
         "DUMP",
+
+        "PALE_GREEN",
+        "PALE_YELLOW",
+        "PALE_SKIN",
+        "PALE_BLUE",
+        "PALE_PURPLE"
     };
 
-    Serial.print("The color is: ");
-    Serial.println(colorString[color]);
+    Serial.print(colorString[color]);
 }
 
 static bool check(uint16_t l, uint16_t r, uint16_t d1, uint16_t d2)
 {
     const uint16_t d = max(d1, d2);
+
     return (max(l, r) - min(l, r)) > d;
 }
 

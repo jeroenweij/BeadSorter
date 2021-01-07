@@ -20,20 +20,25 @@ struct Color
 enum Colors
 {
     NONE,
-    RED, // 1
+    RED,
     GREEN,
     BLUE,
     YELLOW,
-    ORANGE, // 5
+    ORANGE,
     PINK,
     PURPLE,
     GREY,
     BLACK,
-    WHITE, // 10
+    WHITE,
     GLOW,
     BROWN,
+    DUMP,
+
     PALE_GREEN,
-    DUMP, // 14
+    PALE_YELLOW,
+    PALE_SKIN,
+    PALE_BLUE,
+    PALE_PURPLE
 };
 
 static const Color colors[] =

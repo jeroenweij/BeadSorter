@@ -1,7 +1,7 @@
-
 #pragma once
 
+#include "Color.h"
 #include <stdint.h>
 
 void DropperInit();
-void DropperSetPos(int8_t pos);
+void DropperSetPos(Colors color);

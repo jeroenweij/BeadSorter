@@ -31,17 +31,27 @@ static bool setTubler(bool rigth)
     return change;
 }
 
-void DropperInit()
+static int8_t ColorToDropPos(Colors color)
 {
-    DropperSetPos(0);
+    if (color != Colors::NONE && color <= Colors::DUMP)
+    {
+        return color - 1;
+    }
+    return 13;
 }
 
-void DropperSetPos(int8_t pos)
+void DropperInit()
 {
-    if (pos > 13)
-    {
-        return;
-    }
+    DropperSetPos(Colors::RED);
+}
+
+void DropperSetPos(Colors color)
+{
+    Serial.print("Dropper pos to ");
+    ColorPrintName(color);
+    Serial.println();
+
+    int8_t pos = ColorToDropPos(color);
 
     // in steps of 1 degree
     bool tChange = setTubler(pos - numSpaces >= 0);

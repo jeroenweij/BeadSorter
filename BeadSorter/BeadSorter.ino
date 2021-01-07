@@ -5,7 +5,7 @@
 #include "Agitator.h"
 #include "pins.h"
 
-#define PRINT_BUF           100
+#define PRINT_BUF 100
 static void ssprintf(char* fmt, ...)
 {
     static char buf[PRINT_BUF];
@@ -135,7 +135,7 @@ static void DropBead()
 static void ClearQueue()
 {
     Serial.println("CLEARIN QUEUE");
-    DropperSetPos(static_cast < int8_t > (Colors::DUMP) -1);
+    DropperSetPos(Colors::DUMP);
     //    while (BeadAvailable())
     //    {
     //        DropBead();
@@ -197,7 +197,10 @@ static void testAll()
 
     for (const auto &c : toTest)
     {
+        Serial.println("Testing color:");
         ColorPrintName(c);
+        Serial.println();
+
         testColor();
         DropBead();
         DropBead();
@@ -210,12 +213,18 @@ static void SortOne()
     Colors c = TcsGetColor();
     static Colors prevC = Colors::DUMP;
 
-    ColorPrintName(prevC);
+    Serial.print("Detected color: ");
+    ColorPrintName(c);
+    Serial.println();
 
     if (c != Colors::NONE)
     {
+        Serial.print("Dropping color: ");
+        ColorPrintName(prevC);
+        Serial.println();
+
         AgitatorUp();
-        DropperSetPos(static_cast < int8_t > (prevC) - 1);
+        DropperSetPos(prevC);
         DropBead();
         prevC = c;
         AgitatorDown();
@@ -247,7 +256,7 @@ void loop()
                 break;
             case 1 ... 14:
                 ssprintf("> turning to (%d)", state);
-                DropperSetPos(state - 1);
+                DropperSetPos(static_cast < Colors > (state));
                 break;
             case 15:
                 ssprintf("> Testing color (%d)", state);
