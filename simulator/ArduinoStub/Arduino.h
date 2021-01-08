@@ -35,7 +35,7 @@ PinStatus& GetPinStatus(uint8_t pinNum);
 
 
 void pinMode(uint8_t pinNum, uint8_t mode);
-void digitalWrite(uint8_t pin, uint8_t val);
+void digitalWrite(uint8_t pin, uint16_t val);
 int16_t analogRead(uint8_t pin);
 int16_t digitalRead(uint8_t pin);
 

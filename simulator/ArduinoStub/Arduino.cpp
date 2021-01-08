@@ -30,7 +30,7 @@ void pinMode(uint8_t pinNum, uint8_t mode)
     GetPinStatus(pinNum).mode = static_cast<PinMode>(mode);
 }
 
-void digitalWrite(uint8_t pin, uint8_t val)
+void digitalWrite(uint8_t pin, uint16_t val)
 {
     GetPinStatus(pin).value = val;
 }

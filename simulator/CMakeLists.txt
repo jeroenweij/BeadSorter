@@ -21,5 +21,5 @@ add_executable(BeadSorterSimulator
 
 find_package(OpenGL REQUIRED)
 include_directories( ${OPENGL_INCLUDE_DIRS} )
-target_link_libraries(BeadSorterSimulator ArduinoStub BeadSorter glfw pthread freetype ${OPENGL_LIBRARIES} ${CMAKE_DL_LIBS})
+target_link_libraries(BeadSorterSimulator ArduinoStub BeadSorter glfw pthread ${OPENGL_LIBRARIES})
 include_directories (/usr/include/freetype2)

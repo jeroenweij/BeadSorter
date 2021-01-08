@@ -159,22 +159,22 @@ void Window::DrawPinStatus(uint16_t x, uint16_t y, uint8_t pin)
 {
     const PinStatus& status = GetPinStatus(pin);
 
-    DrawBox(x, y, ModeToColor(status.mode));
-    DrawBox(x + 16, y, status.value > 0 ? color.green : color.red);
-    for (uint16_t i = 0; i < status.value && i + 32 < width; i++)
+    PrintfText(pixels, x, y, color.black, "%d", pin);
+    uint8_t offset = 24;
+
+    DrawBox(x + offset, y, ModeToColor(status.mode));
+    offset += 16;
+    DrawBox(x + offset, y, status.value > 0 ? color.green : color.red);
+    offset += 16;
+    for (uint16_t i = 0; i < status.value && i + offset < width; i++)
     {
-        DrawLine(x + 32 + i, y, x + 32 + i, y + 16, color.blue);
+        DrawLine(x + offset + i, y, x + offset + i, y + 16, color.blue);
     }
 }
 
 void Window::Draw(void)
 {
     Clear();
-
-    DrawLine(10, 40, 100, 450, {255, 0, 0});
-    DrawLine(400, 100, 10, 450, {0, 255, 0});
-    DrawLine(610, 450, 20, 100, {0, 0, 255});
-
     uint16_t y = 0;
 
     for (uint8_t i = 0; i < 20; i++)
@@ -182,8 +182,6 @@ void Window::Draw(void)
         DrawPinStatus(100, y, i);
         y += 16;
     }
-
-    PrintText(pixels, 200, 400, color.black, "0123456789");
 }
 
 void Window::OpenWindow(void)
