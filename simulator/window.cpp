@@ -183,25 +183,31 @@ static double degToRad(const double d)
 void Window::FillRecursive(const uint16_t x, const uint16_t y, const Pixel oldColor, const Pixel &color, const uint16_t c)
 {
     if (c == 0)
+    {
         return;
+    }
     if (pixels[y][x] == oldColor)
     {
-        pixels[y][x] = color;
-        if (x < width)
+        uint16_t sx = x;
+        while (x > 0 && pixels[y][sx] == oldColor)
         {
-            FillRecursive(x + 1, y, oldColor, color, c-1);
+            pixels[y][sx] = color;
+            if (y > 0)
+            {
+                FillRecursive(x, y - 1, oldColor, color, c - 1);
+            }
+            sx--;
         }
-        if (x > 0)
+
+        sx = x + 1;
+        while (x < width && pixels[y][sx] == oldColor)
         {
-            FillRecursive(x - 1, y, oldColor, color, c-1);
-        }
-        if (y < heigth)
-        {
-            FillRecursive(x, y + 1, oldColor, color, c-1);
-        }
-        if (y > 0)
-        {
-            FillRecursive(x, y - 1, oldColor, color, c-1);
+            pixels[y][sx] = color;
+            if (y < heigth - 1)
+            {
+                FillRecursive(x, y + 1, oldColor, color, c - 1);
+            }
+            sx++;
         }
     }
     else
@@ -212,7 +218,40 @@ void Window::FillRecursive(const uint16_t x, const uint16_t y, const Pixel oldCo
 
 void Window::Fill(const uint16_t x, const uint16_t y, const Pixel &color)
 {
-    FillRecursive(x, y, pixels[y][x], color, 10000);
+    FillRecursive(x, y, pixels[y][x], color, 250);
+}
+
+void Window::DrawDropPoint(const uint16_t x, const uint16_t y, const uint8_t id, const Pixel& color)
+{
+    DrawCircle(x, y, 16, 36 * 2, color);
+    PrintfText(pixels, x - (id > 9 ? 12 : 6), y - 8, colors.black, "%d", id);
+}
+
+void Window::DrawDropper(const uint16_t x, const uint16_t y, const uint16_t radius, const uint16_t deg, const bool left, const Pixel& color)
+{
+    DrawCircle(x, y, radius, 36 * 2, colors.orange);
+    DrawCircle(x, y, radius+32, 36 * 2, colors.orange);
+
+    double rad        = degToRad(left ? deg : deg + 180);
+    double sine       = sin(rad);
+    double cosine     = cos(rad);
+    const uint16_t sx = x + sine * radius;
+    const uint16_t sy = y + cosine * radius;
+
+    DrawLine(x, y, sx, sy, color);
+
+    static const uint16_t space      = 25;
+    static const uint16_t turnOffset = 10;
+
+    for (int i = 0; i < 14; i++)
+    {
+        uint16_t deg2 = (i % 7) * space + turnOffset;
+        if (i > 6){deg2 += 180;}
+        rad    = degToRad(deg2);
+        sine   = sin(rad);
+        cosine = cos(rad);
+        DrawDropPoint(x + sine * (radius + 16), y + cosine * (radius + 16), i + 1, color);
+    }
 }
 
 void Window::DrawCircle(const uint16_t x, const uint16_t y, const uint16_t radius, const uint16_t numberOfSides, const Pixel& color, bool fill)
@@ -238,7 +277,7 @@ void Window::DrawCircle(const uint16_t x, const uint16_t y, const uint16_t radiu
 
     if (fill)
     {
-        Fill(x, y, colors.red);
+        Fill(x, y, color);
     }
 }
 
@@ -247,13 +286,14 @@ void Window::Draw(void)
     Clear();
     uint16_t y = 16;
 
-
     for (uint8_t i = 0; i < 20; i++)
     {
         DrawPinStatus(0, heigth - y, i);
         y += 16;
     }
-    DrawCircle(300, 300, 100, 50, colors.orange);
+
+
+    DrawDropper(width - 150, 150, 100, GetPinStatus(9).value % 360, GetPinStatus(10).value > 150, colors.red);
 }
 
 void Window::OpenWindow(void)

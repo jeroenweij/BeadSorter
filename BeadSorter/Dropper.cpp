@@ -4,8 +4,8 @@
 #include "Ssprintf.h"
 #include <Servo.h>
 
-static const uint16_t space      = 240;
-static const uint16_t turnOffset = 570;
+static const uint16_t space      = 25;
+static const uint16_t turnOffset = 10;
 static const uint8_t numSpaces   = 7;
 static const uint8_t tumbleLeft  = 40;
 static const uint8_t tumbleRigth = 130;
@@ -63,10 +63,10 @@ void DropperSetPos(Colors color)
 
     if (pos < oldPos)
     {
-        mic -= 25;
+        mic -= 2;
     }
     dropperServo.attach(PIN_DROPPER_SERVO);
-    dropperServo.writeMicroseconds(mic);
+    dropperServo.write(mic);
 
     int8_t offset = abs(pos - oldPos);
     int calcDelay = 0;

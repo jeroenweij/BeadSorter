@@ -34,6 +34,10 @@ static void mainloopManualInput()
     ReturnFreq(2345);
     ReturnFreq(3456);
     ReturnFreq(4567);
+    ReturnFreq(1234);
+    ReturnFreq(2345);
+    ReturnFreq(3456);
+    ReturnFreq(4567);
     WillReturn("available", 0);
 
     loop();
@@ -78,8 +82,8 @@ int main()
         void        (* testFunction)(void);
     } tests[] = {
         {"No actions",   &mainloopNoActios   },
-//        {"Serial input", &mainloopSerialInput},
-//        {"Manual input", &mainloopManualInput},
+        {"Serial input", &mainloopSerialInput},
+        {"Manual input", &mainloopManualInput},
     };
 
     setup();
