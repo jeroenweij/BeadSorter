@@ -58,25 +58,6 @@ Colors TcsGetColor()
 {
     Color color = TcsReadColor();
 
-    static const char* colorString[] =
-    {
-        "NONE",
-        "RED",
-        "GREEN",
-        "BLUE",
-        "YELLOW",
-        "ORANGE",
-        "PINK",
-        "PURPLE",
-        "GREY",
-        "BLACK",
-        "WHITE",
-        "GLOW",
-        "PALE_GREEN",
-        "PALE_YELLOW",
-        "DUMP",
-    };
-
     ssprintf("%u, %u, %u, %u", color.red, color.blue, color.white, color.green);
 
     if (AllUnder(color, 100))
@@ -91,38 +72,72 @@ Colors TcsGetColor()
     {
         return Colors::GLOW;
     }
+    if (AllAbove(color, 760))
+    {
+        return Colors::WHITE;
+    }
     if (color.green > color.blue && color.green > color.red)
     {
+        Serial.println("Green is biggest");
         return Colors::GREEN;
     }
     if (color.blue > color.green && color.blue > color.red)
     {
-        if (color.red > 550)
+        Serial.println("Blue is biggest");
+        if (color.red > color.white)
         {
-            return Colors::PURPLE;
-        }
-        else
-        {
+            Serial.println("Backup GREY");
             return Colors::BLUE;
         }
+        if (color.white > color.red && color.white - color.red < 200)
+        {
+            Serial.println("Backup PURPLE");
+            return Colors::PURPLE;
+        }
+
+        return Colors::BLUE;
     }
     if (color.white < color.red && color.white < color.blue && color.white < color.green)
     {
-        if (color.white < 450)
-        {
-            return Colors::YELLOW;
-        }
-        if (color.red > 780)
+        Serial.println("White is smallest");
+        if (color.blue > color.green && color.blue - color.green > 150)
         {
             return Colors::ORANGE;
         }
-        return Colors::GREY;
+        if (color.red > color.white)
+        {
+            if (color.red > 750)
+            {
+                return Colors::YELLOW;
+            }
+            return Colors::GREY;
+        }
+
+        return Colors::DUMP;
     }
-    if (color.green < 400)
+    if (color.red > color.green && color.red > color.blue)
     {
+        Serial.println("Red is biggest");
+        if (color.white > color.blue)
+        {
+            return Colors::PURPLE;
+        }
+        if (color.blue > color.white && color.blue - color.white > 150)
+        {
+            return Colors::RED;
+        }
+        if (color.red < 700)
+        {
+            return Colors::BROWN;
+        }
+        else
+        {
+            return Colors::PINK;
+        }
         return Colors::RED;
     }
-    return Colors::PINK;
+    Serial.println("FALLOUT");
+    return Colors::DUMP;
 }
 
 static uint32_t readFreq()
@@ -139,8 +154,10 @@ static uint32_t readFreq()
     return time;
 }
 
-uint32_t cMax[4] = {578736, 215144, 744488, 744660};
-uint32_t cMin[4] = {7716, 5692, 8436, 9816};
+const uint32_t cMax[4] = {410000, 140000, 310000, 450000};
+const uint32_t cMin[4] = {3168, 3168, 3168, 3168};
+const uint32_t maxOver[4] = {378620,118080,319504,433124};
+
 struct Color TcsReadColor()
 {
     union ColorUnion c = {0};
@@ -158,15 +175,20 @@ struct Color TcsReadColor()
         uint32_t f = readFreq();
         if (f < cMin[i])
         {
-            ssprintf("Adjusting lower bound %d from %lu to %lu", i, cMin[i], f);
-            cMin[i] = f;
-            ssprintf("Adjusting %d set to %lu", i, cMin[i]);
+            // ssprintf("Adjusting lower bound %d from %lu to %lu", i, cMin[i], f);
+            // cMin[i] = f;
+            f = cMin[i];
         }
         if (f > cMax[i])
         {
-            ssprintf("Adjusting upper bound %d from %lu to %lu", i, cMin[i], f);
-            cMax[i] = f;
-            ssprintf("Adjusting %d set to %lu", i, cMax[i]);
+            ssprintf("Adjusting upper bound %d from %lu to %lu", i, cMax[i], f);
+            // cMax[i] = f;
+            uint32_t overshot = f - cMax[i];
+            if (overshot > maxOver[i])
+                overshot = maxOver[i];
+            uint32_t correction = maxOver[i] - overshot;
+            correction/=100;
+            f = cMax[i] - correction;
         }
         c.raw[i] = 1000 - map(f, cMin[i], cMax[i], 0, 1000);
 

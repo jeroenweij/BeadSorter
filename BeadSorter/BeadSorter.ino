@@ -193,9 +193,31 @@ static void testAll()
     }
 }
 
+static Colors TwoOutOFThree()
+{
+    while (true)
+    {
+        Colors c1 = TcsGetColor();
+        Colors c2 = TcsGetColor();
+        if (c1 == c2)
+        {
+            return c1;
+        }
+        Colors c3 = TcsGetColor();
+        if (c1 == c3)
+        {
+            return c1;
+        }
+        if (c2 == c3)
+        {
+            return c2;
+        }
+    }
+}
+
 static void SortOne()
 {
-    Colors c = TcsGetColor();
+    Colors c = TwoOutOFThree();
     static Colors prevC = Colors::DUMP;
 
     ssprintf("Detected color: %s ", ColorToString(c));

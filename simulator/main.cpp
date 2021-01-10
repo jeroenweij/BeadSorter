@@ -78,8 +78,8 @@ int main()
         void        (* testFunction)(void);
     } tests[] = {
         {"No actions",   &mainloopNoActios   },
-        {"Serial input", &mainloopSerialInput},
-        {"Manual input", &mainloopManualInput},
+//        {"Serial input", &mainloopSerialInput},
+//        {"Manual input", &mainloopManualInput},
     };
 
     setup();

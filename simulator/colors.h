@@ -1,4 +1,5 @@
 #include <GL/gl.h>
+#include <iostream>
 
 #pragma once
 
@@ -11,6 +12,10 @@ struct Pixel
     GLubyte g;
     GLubyte b;
 };
+
+bool operator== (const Pixel& lhs, const Pixel& rhs);
+
+std::ostream& operator << (std::ostream& os, const Pixel& p);
 
 class MainColor {
 public:
