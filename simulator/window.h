@@ -1,4 +1,5 @@
 #pragma once
+#include <thread>
 
 #include "colors.h"
 #include "windowSize.h"
@@ -25,4 +26,5 @@ private:
     void DrawDropPoint(const uint16_t x, const uint16_t y, const uint8_t id, const Pixel &color);
 
     Pixel pixels[heigth][width];
+    static std::thread t;
 };

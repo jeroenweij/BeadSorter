@@ -47,7 +47,7 @@ int16_t analogRead(uint8_t pin)
 
 void delay(uint32_t ms)
 {
-    usleep(ms * 500); // half of normal for faster execution
+    //usleep(ms * 500); // half of normal for faster execution
 }
 
 uint32_t pulseIn(uint8_t pin, uint8_t state, unsigned long timeout)

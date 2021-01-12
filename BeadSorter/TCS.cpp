@@ -12,134 +12,6 @@ union ColorUnion
     static_assert(sizeof(raw) == sizeof(struct Color), "Sizes must match");
 };
 
-static bool AllUnder(Color& c, uint16_t tresh)
-{
-    if (c.red > tresh)
-    {
-        return false;
-    }
-    if (c.blue > tresh)
-    {
-        return false;
-    }
-    if (c.white > tresh)
-    {
-        return false;
-    }
-    if (c.green > tresh)
-    {
-        return false;
-    }
-    return true;
-}
-
-static bool AllAbove(Color& c, uint16_t tresh)
-{
-    if (c.red < tresh)
-    {
-        return false;
-    }
-    if (c.blue < tresh)
-    {
-        return false;
-    }
-    if (c.white < tresh)
-    {
-        return false;
-    }
-    if (c.green < tresh)
-    {
-        return false;
-    }
-    return true;
-}
-
-Colors TcsGetColor()
-{
-    Color color = TcsReadColor();
-
-    ssprintf("%u, %u, %u, %u", color.red, color.blue, color.white, color.green);
-
-    if (AllUnder(color, 100))
-    {
-        return Colors::BLACK;
-    }
-    if (AllUnder(color, 350))
-    {
-        return Colors::BROWN;
-    }
-    if (AllAbove(color, 950))
-    {
-        return Colors::GLOW;
-    }
-    if (AllAbove(color, 760))
-    {
-        return Colors::WHITE;
-    }
-    if (color.green > color.blue && color.green > color.red)
-    {
-        Serial.println("Green is biggest");
-        return Colors::GREEN;
-    }
-    if (color.blue > color.green && color.blue > color.red)
-    {
-        Serial.println("Blue is biggest");
-        if (color.red > color.white)
-        {
-            Serial.println("Backup GREY");
-            return Colors::BLUE;
-        }
-        if (color.white > color.red && color.white - color.red < 200)
-        {
-            Serial.println("Backup PURPLE");
-            return Colors::PURPLE;
-        }
-
-        return Colors::BLUE;
-    }
-    if (color.white < color.red && color.white < color.blue && color.white < color.green)
-    {
-        Serial.println("White is smallest");
-        if (color.blue > color.green && color.blue - color.green > 150)
-        {
-            return Colors::ORANGE;
-        }
-        if (color.red > color.white)
-        {
-            if (color.red > 750)
-            {
-                return Colors::YELLOW;
-            }
-            return Colors::GREY;
-        }
-
-        return Colors::DUMP;
-    }
-    if (color.red > color.green && color.red > color.blue)
-    {
-        Serial.println("Red is biggest");
-        if (color.white > color.blue)
-        {
-            return Colors::PURPLE;
-        }
-        if (color.blue > color.white && color.blue - color.white > 150)
-        {
-            return Colors::RED;
-        }
-        if (color.red < 700)
-        {
-            return Colors::BROWN;
-        }
-        else
-        {
-            return Colors::PINK;
-        }
-        return Colors::RED;
-    }
-    Serial.println("FALLOUT");
-    return Colors::DUMP;
-}
-
 static uint32_t readFreq()
 {
     pulseIn(PIN_TCS_OUT, LOW);
@@ -154,10 +26,9 @@ static uint32_t readFreq()
     return time;
 }
 
-const uint32_t cMax[4] = {410000, 140000, 310000, 450000};
-const uint32_t cMin[4] = {3168, 3168, 3168, 3168};
-const uint32_t maxOver[4] = {378620,118080,319504,433124};
-
+const uint32_t cMax[4]       = {1402956, 472660, 1143452, 1604424};
+const uint32_t cMin[4]       = {3200, 3200, 3200, 3200};
+static const uint32_t mapMax = 3500;
 struct Color TcsReadColor()
 {
     union ColorUnion c = {0};
@@ -181,16 +52,11 @@ struct Color TcsReadColor()
         }
         if (f > cMax[i])
         {
-            ssprintf("Adjusting upper bound %d from %lu to %lu", i, cMax[i], f);
-            // cMax[i] = f;
-            uint32_t overshot = f - cMax[i];
-            if (overshot > maxOver[i])
-                overshot = maxOver[i];
-            uint32_t correction = maxOver[i] - overshot;
-            correction/=100;
-            f = cMax[i] - correction;
+            // ssprintf("Adjusting upper bound %d from %lu to %lu", i, cMax[i], f);
+            // Max[i] = f;
+            f = cMax[i];
         }
-        c.raw[i] = 1000 - map(f, cMin[i], cMax[i], 0, 1000);
+        c.raw[i] = mapMax - map(f, cMin[i], cMax[i], 0, mapMax);
 
         delay(50);
     }

@@ -5,6 +5,59 @@
 #include "Ssprintf.h"
 
 #define TEST_I 15
+
+bool autoGo = false;
+
+struct MenuEntry
+{
+    const uint8_t start;
+    const uint8_t numEntrys;
+    void          (* funPtrNoArg)(void);
+    void          (* funPtr)(Colors);
+    const char*   desc;
+};
+
+static void testColor();
+static void SortOne();
+static void CheckAvailable();
+static void DropBead();
+static bool BeadAvailable();
+static void testAll();
+static void ClearQueue();
+static void ToggleAutoGo();
+
+static const MenuEntry menu[] =
+{
+    {1,  20, NULL,            &DropperSetPos, "Move dropper to position X"                },
+    {51, 1,  &testColor,      NULL,           "Test the current color"                    },
+    {52, 1,  &SortOne,        NULL,           "Sort one bead"                             },
+    {53, 1,  &Agitate,        NULL,           "Agitate"                                   },
+    {54, 1,  &DropBead,       NULL,           "Drop 1 bead"                               },
+    {55, 1,  &CheckAvailable, NULL,           "Check if there are enough beads to proceed"},
+    {56, 1,  &testAll,        NULL,           "Test all colors"                           },
+    {57, 1,  &ClearQueue,     NULL,           "Empty the queue"                           },
+    {99, 1,  &ToggleAutoGo,   NULL,           "Toggle automatic sorting"                  },
+};
+
+static void ToggleAutoGo()
+{
+    autoGo = !autoGo;
+    ssprintf("> Autogo is now: %s", autoGo ? "ON" : "OFF");
+}
+
+static void CheckAvailable()
+{
+    ssprintf("> Bead is %s available.", BeadAvailable() ? "wel" : "NOT");
+}
+
+static void DropBead()
+{
+    Serial.println("Dropping");
+    digitalWrite(PIN_SOLENOID, HIGH);
+    delay(400);
+    digitalWrite(PIN_SOLENOID, LOW);
+}
+
 static void testColor()
 {
     struct Color c    = {0};
@@ -36,6 +89,7 @@ static void testColor()
             cmax.green = max(cmax.green, c.green);
         }
         ssprintf("%03u, %u, %u, %u, %u", i, c.red, c.blue, c.white, c.green);
+        DropBead();
         delay(2000);
     }
 
@@ -73,30 +127,19 @@ static void printHelp()
     Serial.println("Comand input online, command options:");
     Serial.println("-------------------------");
 
-    Serial.println("1 - 14: ");
-    Serial.println("Move dropper to position (1 - 14)");
-    Serial.println("-------------------------");
-    Serial.println("15: ");
-    Serial.println("Test the current color");
-    Serial.println("-------------------------");
-    Serial.println("16: ");
-    Serial.println("Sort one bead");
-    Serial.println("-------------------------");
-    Serial.println("17: ");
-    Serial.println("Agitate");
-    Serial.println("-------------------------");
-    Serial.println("18: ");
-    Serial.println("Drop 1 bead");
-    Serial.println("-------------------------");
-    Serial.println("19: ");
-    Serial.println("Check if there are enough beads to proceed");
-    Serial.println("-------------------------");
-    Serial.println("20: ");
-    Serial.println("Test all colors seperated by black beads");
-    Serial.println("-------------------------");
-    Serial.println("21: ");
-    Serial.println("Empty the queue");
-    Serial.println("-------------------------");
+    for (const MenuEntry& entry : menu)
+    {
+        if (entry.numEntrys > 1)
+        {
+            ssprintf("%d - %d:", entry.start, entry.start + entry.numEntrys - 1);
+        }
+        else
+        {
+            ssprintf("%d:", entry.start);
+        }
+        Serial.println(entry.desc);
+        Serial.println("-------------------------");
+    }
 }
 
 static bool BeadAvailable()
@@ -107,31 +150,22 @@ static bool BeadAvailable()
 
     ssprintf("Availability sensor reads: %d", v);
     digitalWrite(PIN_AVAILABILITY_LED, LOW);
-    return true; // TODO v <> X
-}
-
-static void DropBead()
-{
-    Serial.println("Dropping");
-    digitalWrite(PIN_SOLENOID, HIGH);
-    delay(400);
-    digitalWrite(PIN_SOLENOID, LOW);
-    delay(600);
+    return v > 650;
 }
 
 static void ClearQueue()
 {
     Serial.println("CLEARIN QUEUE");
     DropperSetPos(Colors::DUMP);
-    //    while (BeadAvailable())
-    //    {
-    //        DropBead();
-    //        delay(100);
-    //    }
+    while (BeadAvailable())
+    {
+        DropBead();
+        delay(600);
+    }
     for (int i = 0; i < 10; i++)
     {
         DropBead();
-        delay(100);
+        delay(600);
     }
     Serial.println("Queue cleared");
 }
@@ -188,6 +222,7 @@ static void testAll()
 
         testColor();
         DropBead();
+        delay(600);
         DropBead();
         delay(5000);
     }
@@ -197,13 +232,13 @@ static Colors TwoOutOFThree()
 {
     while (true)
     {
-        Colors c1 = TcsGetColor();
-        Colors c2 = TcsGetColor();
+        Colors c1 = TcsGetColor(TcsReadColor());
+        Colors c2 = TcsGetColor(TcsReadColor());
         if (c1 == c2)
         {
             return c1;
         }
-        Colors c3 = TcsGetColor();
+        Colors c3 = TcsGetColor(TcsReadColor());
         if (c1 == c3)
         {
             return c1;
@@ -221,22 +256,18 @@ static void SortOne()
     static Colors prevC = Colors::DUMP;
 
     ssprintf("Detected color: %s ", ColorToString(c));
-
-    if (c != Colors::NONE)
-    {
-        ssprintf("Dropping color: %s ", ColorToString(prevC));
-        AgitatorUp();
-        DropperSetPos(prevC);
-        DropBead();
-        prevC = c;
-        AgitatorDown();
-    }
+    ssprintf("Dropping color: %s ", ColorToString(prevC));
+    AgitatorUp();
+    DropperSetPos(prevC);
+    DropBead();
+    prevC = c;
+    AgitatorDown();
 }
 
 void loop()
 {
     delay(100);
-    if (digitalRead(PIN_BUTTON) == LOW)
+    if (digitalRead(PIN_BUTTON) == LOW || autoGo)
     {
         if (BeadAvailable())
         {
@@ -251,46 +282,35 @@ void loop()
     while (Serial.available())
     {
         int state = Serial.parseInt();
-
-        switch (state)
+        if (state == 0)
         {
-            case 0:
+            continue;
+        }
+
+        ssprintf("New state = %d", state);
+
+        bool found = false;
+        for (const MenuEntry& entry : menu)
+        {
+            if (state >= entry.start && state < entry.start + entry.numEntrys)
+            {
+                if (entry.funPtr)
+                {
+                    entry.funPtr(static_cast < Colors > (state - 1));
+                }
+                else if (entry.funPtrNoArg)
+                {
+                    entry.funPtrNoArg();
+                }
+                found = true;
                 break;
-            case 1 ... 14:
-                ssprintf("> turning to (%d)", state);
-                DropperSetPos(static_cast < Colors > (state));
-                break;
-            case 15:
-                ssprintf("> Testing color (%d)", state);
-                testColor();
-                break;
-            case 16:
-                ssprintf("> Sort 1 bead (%d)", state);
-                SortOne();
-                break;
-            case 17:
-                ssprintf("> Agitating (%d)", state);
-                Agitate();
-                break;
-            case 18:
-                ssprintf("> Dropping (%d)", state);
-                DropBead();
-                break;
-            case 19:
-                ssprintf("> Bead is %s available. (%d)", BeadAvailable() ? "wel" : "NOT", state);
-                break;
-            case 20:
-                ssprintf("> Testing all colors (%d)", state);
-                testAll();
-                break;
-            case 21:
-                ssprintf("> Emptying the queue (%d)", state);
-                ClearQueue();
-                break;
-            default:
-                ssprintf("> cannot execute command (%d)", state);
-                printHelp();
-                break;
+            }
+        }
+
+        if (!found)
+        {
+            ssprintf("> cannot execute command (%d)", state);
+            printHelp();
         }
     }
 }

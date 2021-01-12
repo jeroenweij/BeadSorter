@@ -4,9 +4,18 @@
 #include "Ssprintf.h"
 #include <Servo.h>
 
-static const uint16_t space      = 25;
-static const uint16_t turnOffset = 10;
-static const uint8_t numSpaces   = 7;
+const uint8_t positions[] = {14, // 1
+                             30,
+                             46, // 3
+                             63,
+                             81, // 5
+                             98,
+                             115, // 7
+                             132,
+                             148, // 9
+                             165, };
+
+static const uint8_t numSpaces   = sizeof(positions);
 static const uint8_t tumbleLeft  = 40;
 static const uint8_t tumbleRigth = 130;
 
@@ -15,6 +24,7 @@ static int8_t oldPos      = 0;
 
 Servo dropperServo;
 Servo tubbleServo;
+
 
 static bool setTubler(bool rigth)
 {
@@ -34,11 +44,7 @@ static bool setTubler(bool rigth)
 
 static int8_t ColorToDropPos(Colors color)
 {
-    if (color != Colors::NONE && color <= Colors::DUMP)
-    {
-        return color - 1;
-    }
-    return 13;
+    return color;
 }
 
 void DropperInit()
@@ -59,12 +65,12 @@ void DropperSetPos(Colors color)
 
     Serial.print("pos to ");
     Serial.println(pos + 1);
-    int mic = (pos * space) + turnOffset;
+    int mic = positions[pos];
 
-    if (pos < oldPos)
-    {
-        mic -= 2;
-    }
+//    if (pos < oldPos)
+//    {
+//        mic -= 1;
+//    }
     dropperServo.attach(PIN_DROPPER_SERVO);
     dropperServo.write(mic);
 
@@ -83,7 +89,7 @@ void DropperSetPos(Colors color)
     delay(calcDelay);
     if (tChange)
     {
-        tubbleServo.detach();
+        // tubbleServo.detach();
     }
-    dropperServo.detach();
+    // dropperServo.detach();
 }

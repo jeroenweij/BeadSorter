@@ -17,28 +17,34 @@ struct Color
     uint16_t greenDelta;
 };
 
+#define FOREACH_COLOR(COLOR) \
+    COLOR(RED)   \
+    COLOR(GREEN)   \
+    COLOR(BLUE)   \
+    COLOR(YELLOW)   \
+    COLOR(ORANGE)   \
+    COLOR(PINK)   \
+    COLOR(PURPLE)   \
+    COLOR(GREY)   \
+    COLOR(BLACK)   \
+    COLOR(WHITE)   \
+    COLOR(GLOW)   \
+    COLOR(BROWN)   \
+    COLOR(PALE_GREEN)   \
+    COLOR(PALE_YELLOW)   \
+    COLOR(PALE_SKIN)   \
+    COLOR(PALE_BLUE)   \
+    COLOR(PALE_PURPLE)   \
+    COLOR(PALE)   \
+    COLOR(PALE_2)   \
+    COLOR(DUMP)
+
+#define GENERATE_ENUM(ENUM)     ENUM,
+#define GENERATE_STRING(STRING) #STRING,
+
 enum Colors
 {
-    NONE,
-    RED,
-    GREEN,
-    BLUE,
-    YELLOW,
-    ORANGE,
-    PINK,
-    PURPLE,
-    GREY,
-    BLACK,
-    WHITE,
-    GLOW,
-    BROWN,
-    DUMP,
-
-    PALE_GREEN,
-    PALE_YELLOW,
-    PALE_SKIN,
-    PALE_BLUE,
-    PALE_PURPLE
+    FOREACH_COLOR(GENERATE_ENUM)
 };
 
 static const Color colors[] =
@@ -62,4 +68,5 @@ static const Color colors[] =
 };
 
 const char* ColorToString(const Colors &color);
+Colors TcsGetColor(const Color color);
 bool operator == (const Color& lhs, const Color& rhs);
